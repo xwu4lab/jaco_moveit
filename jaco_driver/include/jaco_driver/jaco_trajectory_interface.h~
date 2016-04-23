@@ -1,0 +1,91 @@
+#ifndef JACO_DRIVER_JACO_TRAJECTORY_INTERFACE_H
+#define JACO_DRIVER_JACO_TRAJECTORY_INTERFACE_H
+
+
+
+#include <ros/ros.h>
+
+#include <jaco_msgs/JointAngles.h>
+#include <industrial_msgs/RobotStatus.h>
+#include <sensor_msgs/JointState.h>
+#include <trajectory_msgs/JointTrajectory.h>
+#include <control_msgs/FollowJointTrajectoryAction.h>
+
+#define READY_FOR_MOTION_ true
+#define STOP_MOTION_ false
+
+namespace jaco
+{
+
+class JointTrajectoryInterface
+{
+
+public:
+    JointTrajectoryInterface(const ros::NodeHandle &nodeHandle);
+    ~JointTrajectoryInterface();
+    
+    void currentPositionCallback(const sensor_msgs::JointStateConstPtr& current_state);
+    void jointTrajectoryCallback(const trajectory_msgs::JointTrajectoryConstPtr& joint_traj);
+    void publishJointCmd(void);
+    
+    trajectory_msgs::JointTrajectory getJointTraj(void);
+    void setMotionStatus(bool);
+    bool getMotionStatus(void);
+
+private:
+
+    ros::NodeHandle node_handle_;
+
+
+    void currentPositionTimer(const ros::TimerEvent&);
+    void jointTrajectoryTimer(const ros::TimerEvent&);
+    void statusTimer(const ros::TimerEvent&);
+
+    void publishFeedbackState(void);
+    void publishRobotStatus(void);
+
+    ros::Subscriber current_position_subscriber_;  
+    ros::Subscriber joint_trajectory_subscriber_; 
+
+    ros::Publisher feedback_state_publisher_;
+    ros::Publisher robot_status_publisher_;
+    ros::Publisher joint_cmd_publisher_;
+ 
+    ros::Timer status_timer_;
+    ros::Timer current_pos_timer_;
+    ros::Timer joint_traj_timer_;
+
+    double status_interval_seconds_;
+    
+    double current_pos_timeout_seconds_;
+    double joint_traj_timeout_seconds_;
+    
+    double current_pos_interval_seconds_;
+    double joint_traj_interval_seconds_;
+    
+    
+    bool current_pos_timer_flag_;
+    bool joint_traj_timer_flag_;
+
+    ros::Time last_current_pos_cmd_time_;
+    ros::Time last_joint_traj_cmd_time_;   
+
+    control_msgs::FollowJointTrajectoryFeedback feedback_state_;
+    industrial_msgs::RobotStatus robot_status_;
+    
+    sensor_msgs::JointState current_state_;  
+    trajectory_msgs::JointTrajectory joint_traj_;
+
+    std::vector< std::string > joint_names_;
+    trajectory_msgs::JointTrajectoryPoint joint_traj_point_;
+    jaco_msgs::JointAngles joint_cmd_;
+    
+    bool motion_status_;
+
+}; //joint_trajectory_interface
+
+
+	
+} //jaco
+
+#endif /* JACO_TRAJECTORY_INTERFACE_H */

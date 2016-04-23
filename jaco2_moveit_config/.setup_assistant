@@ -1,0 +1,8 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: jaco2_model
+    relative_path: robots/jaco2_model.urdf
+  SRDF:
+    relative_path: config/jaco2.srdf
+  CONFIG:
+    generated_timestamp: 1461340079
